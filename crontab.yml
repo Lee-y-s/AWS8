@@ -1,0 +1,12 @@
+---
+- name: set crontab
+  hosts: all
+  gather_facts: false
+  ignore_errors: ture
+  tasks:
+  - name: crontab for log
+    cron:
+      minute: "59"
+      hour: "23"
+      user: root
+      job: "/home/ec2-user/cronLog.sh"

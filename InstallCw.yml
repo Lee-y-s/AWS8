@@ -1,0 +1,50 @@
+---
+- name: cwa web config
+  hosts: web
+  remote_user: ec2-user
+  gather_facts: false
+  ignore_errors: true
+  tasks:
+    - name: copy config files to nodes
+      copy:
+        src: "/home/ec2-user/web_config.json"
+        dest: "/home/ec2-user/web_config.json"
+   
+    - name: install cwa
+      yum:
+        name: 'amazon-cloudwatch-agent'
+        state: latest
+
+    - name: change dir
+      shell: sudo cd /opt/aws/amazon-cloudwatch-agent/bin
+
+    - name: cp json
+      shell: sudo cp /home/ec2-user/web_config.json /opt/aws/amazon-cloudwatch-agent/bin/config.json
+
+    - name: start cwa
+      shell: sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/opt/aws/amazon-cloudwatch-agent/bin/config.json -s
+
+- name: cwa was config
+  hosts: was
+  remote_user: ec2-user
+  gather_facts: false
+  ignore_errors: true
+  tasks:
+    - name: copy config files to nodes
+      copy:
+        src: "/home/ec2-user/was_config.json"
+        dest: "/home/ec2-user/was_config.json"
+
+    - name: install cwa
+      yum:
+        name: 'amazon-cloudwatch-agent'
+        state: latest
+
+    - name: change dir
+      shell: sudo cd /opt/aws/amazon-cloudwatch-agent/bin
+
+    - name: cp json
+      shell: sudo cp /home/ec2-user/was_config.json /opt/aws/amazon-cloudwatch-agent/bin/config.json
+
+    - name: start cwa
+      shell: sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/opt/aws/amazon-cloudwatch-agent/bin/config.json -s

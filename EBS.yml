@@ -1,0 +1,42 @@
+---
+# tasks file for ebs
+
+- name: EBS mount
+  hosts: weba
+  gather_facts: false
+  ignore_errors: true
+
+  tasks:
+
+  - name: umount
+    shell: 'sudo umount /home/ec2-user/EBS'
+
+  - name: Format volume
+    shell: 'sudo mkfs -t ext4 /dev/sdf'
+
+  - name: Mount point Create
+    file:
+      path: /home/ec2-user/EBS
+      state: directory
+      owner: ec2-user
+      group: ec2-user
+      mode: 0644
+
+  - name: Mount
+    become: yes
+    mount:
+      path: /home/ec2-user/EBS
+      src: /dev/sdf
+      fstype: ext4
+      state: mounted
+
+- name: EBS mount Check
+  hosts: localhost
+  gather_facts: false
+  ignore_errors: true
+
+  tasks:
+  - name: Check
+    shell: 'ansible weba -m shell -a "df -hT"'
+    register: result
+  - debug: var=result
