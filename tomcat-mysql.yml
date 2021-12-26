@@ -1,0 +1,110 @@
+---
+# tasks file for efs
+
+- name: tomcat install
+  hosts: was
+  gather_facts: false
+  ignore_errors: true
+
+  tasks:
+  - name: yum install java-1.8.0-openjdk -y
+    yum:
+      name: java-1.8.0-openjdk
+      state: present
+
+  - name: yum install java-1.8.0-openjdk -y
+    yum:
+      name: java-1.8.0-openjdk-devel.x86_64
+      state: present     
+
+  - name: get_url apache-tomcat
+    get_url:
+      url: 'https://dlcdn.apache.org/tomcat/tomcat-9/v9.0.56/bin/apache-tomcat-9.0.56.tar.gz'
+      dest: '/home/ec2-user'
+
+  - name: unarchive
+    unarchive:
+      src: '/home/ec2-user/apache-tomcat-9.0.56.tar.gz'
+      dest: '/home/ec2-user'
+      remote_src: yes
+
+  - name: touch file
+    file:
+      path: /etc/systemd/system/tomcat.service
+      state: touch
+
+  - name: tomcat enviro set
+    lineinfile:
+      path: /etc/systemd/system/tomcat.service
+      line: |
+        [Unit]
+        Description=tomcat 9
+        After=network.target syslog.target
+
+        [Service]
+        Type=forking
+        Environment=/home/ec2-user/apache-tomcat-9.0.56/
+        User=root
+        Group=root
+        ExecStart=/home/ec2-user/apache-tomcat-9.0.56/bin/startup.sh
+        ExecStop=/home/ec2-user/apache-tomcat-9.0.56/bin/shutdown.sh
+
+        [Install]
+        WantedBy=multi-user.target     
+           
+  - name: copy test.jsp files to nodes
+    copy:
+      src: "/home/ec2-user/Ansible/test.jsp"
+      dest: "/home/ec2-user/apache-tomcat-9.0.56/webapps/ROOT/test.jsp"
+
+  - name: Tomcat Start
+    systemd:
+      name: tomcat.service
+      state: started
+      enabled: yes
+ 
+
+  - name: get_url mysql-connector
+    get_url:
+      url: 'https://dev.mysql.com/get/Downloads/Connector-J/mysql-connector-java-8.0.22.tar.gz'
+      dest: '/home/ec2-user'    
+
+  - name: unarchive
+    unarchive:
+      src: '/home/ec2-user/mysql-connector-java-8.0.22.tar.gz'
+      dest: '/home/ec2-user'
+      remote_src: yes        
+
+  - name: file copy
+    copy:
+      src: '/home/ec2-user/mysql-connector-java-8.0.22/mysql-connector-java-8.0.22.jar'
+      dest: '/usr/lib/jvm/jre/lib/ext/'
+      remote_src: yes
+
+  - name: owner of sh file changes to tomcat
+    shell:
+      cmd: chown -RH ec2-user.ec2-user /home/ec2-user/apache-tomcat-9.0.56/conf/
+      warn: false
+
+  - name: tomcat-users.xml changes
+    lineinfile:
+      path: /home/ec2-user/apache-tomcat-9.0.56/conf/tomcat-users.xml
+      regexp: '</tomcat-users>'
+      line: |
+        <role rolename="manager-script"/>
+        <role rolename="manager-gui"/>
+        <role rolename="manager-jmx"/>
+        <role rolename="manager-status"/>
+        <user username="tomcat" password="tomcat" roles="manager-gui,manager-script,manager-status,manager-jmx"/>
+        </tomcat-users>
+      
+  - name: Tomcat Stop
+    systemd:
+      name: tomcat.service
+      state: stopped
+        
+  - name: Tomcat Start
+    systemd:
+      name: tomcat.service
+      state: started
+    

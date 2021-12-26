@@ -1,0 +1,24 @@
+---
+# tasks file for Petclinic Redeploy
+
+- name: Petclinic Redeploy
+  hosts: was
+  gather_facts: false
+  ignore_errors: true
+  
+  tasks: 
+
+  - name: mvn reDeploy
+    command:
+      cmd: sudo ./mvnw tomcat7:redeploy -P MySQL
+      chdir: /home/ec2-user/petclinic/
+
+  - name: Tomcat Stop
+    systemd:
+      name: tomcat.service
+      state: stopped
+        
+  - name: Tomcat Start
+    systemd:
+      name: tomcat.service
+      state: started      
