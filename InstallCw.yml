@@ -7,7 +7,7 @@
   tasks:
     - name: copy config files to nodes
       copy:
-        src: "/home/ec2-user/web_config.json"
+        src: "/home/ec2-user/Ansible/web_config.json"
         dest: "/home/ec2-user/web_config.json"
    
     - name: install cwa
@@ -32,7 +32,7 @@
   tasks:
     - name: copy config files to nodes
       copy:
-        src: "/home/ec2-user/was_config.json"
+        src: "/home/ec2-user/Ansible/was_config.json"
         dest: "/home/ec2-user/was_config.json"
 
     - name: install cwa

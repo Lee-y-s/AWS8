@@ -4,9 +4,9 @@
   gather_facts: false
   ignore_errors: true
   tasks:
-  - name: mkdir Was-a
+  - name: mkdir S3
     file:
-      path: /S3/Was-a
+      path: /home/ec2-user/S3/Was-a
       state: directory
       owner: ec2-user
       group: ec2-user
@@ -14,8 +14,8 @@
   
   - name: access log
     copy:
-      src: '/home/ec2-user/apache-tomcat-9.0.54/logs/catalina.2021*'
-      dest: '/S3/Was-a/catalina.out'
+      src: '/home/ec2-user/apache-tomcat-9.0.56/logs/catalina.*' 
+      dest: '/home/ec2-user/S3/Was-a/catalina.out'
       remote_src: yes
 
 - name: was log
@@ -25,14 +25,15 @@
   tasks:
   - name: mkdir Was-c
     file:
-      path: /S3/Was-c
+      path: /home/ec2-user/S3/Was-c
       state: directory
       owner: ec2-user
       group: ec2-user
       mode: 0644
-  
+
   - name: access log
     copy:
-      src: '/home/ec2-user/apache-tomcat-9.0.54/logs/catalina.2021*'
-      dest: '/S3/Was-c/catalina.out'
+      src: '/home/ec2-user/apache-tomcat-9.0.56/logs/catalina.*'
+      dest: '/home/ec2-user/S3/Was-c/catalina.out'
       remote_src: yes
+ 

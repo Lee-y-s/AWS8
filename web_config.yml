@@ -20,6 +20,7 @@
     copy:
       src: "/home/ec2-user/vhost.conf"
       dest: "/etc/httpd/conf.d/vhost.conf"
+      remote_src: yes
 
   - name: vi vhosts
     lineinfile:
@@ -34,6 +35,6 @@
 
   - name: restart apache
     service:
-      name: apache2
+      name: httpd
       state: restarted
        
