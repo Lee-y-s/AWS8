@@ -1,16 +1,13 @@
 ---
-- name: create ddirectory
+- name: create directory
   hosts: was
   gather_facts: false
   ignore_errors: true
   tasks:
-    - name : delete
-      shell : 'rm -rf /home/ec2-user/apache-tomcat-9.0.56/download'
-
     - name: create download directory
       file:
-        path: /home/ec2-user/apache-tomcat-9.0.56/download
         state: directory
+        path: /home/ec2-user/apache-tomcat-9.0.56/download
 
     - name: download tomcat-cluster-redis-session-manager
       get_url:
@@ -36,10 +33,12 @@
         remote_src: yes
 
     - name: edit redis-data-cache.properties
+      shell: 'rm -rf /home/ec2-user/apache-tomcat-9.0.56/conf/redis-data-cache.properties'
+
+    - name: copy redis
       copy:
         src: '/home/ec2-user/Ansible/redis.jsp'
         dest: '/home/ec2-user/apache-tomcat-9.0.56/conf/redis-data-cache.properties'
-   
 
     - name: edit web.xml
       replace:
@@ -52,26 +51,23 @@
         path: '/home/ec2-user/apache-tomcat-9.0.56/conf/web.xml'
         line: '<distributable/>'
 
-    - name: absent context.xml
-      ansible.builtin.lineinfile:
-        path: '/home/ec2-user/apache-tomcat-9.0.56/conf/context.xml'
-        line: '</Context>'
-
     - name: add context.xml
-      blockinfile:
+      lineinfile:
         path: '/home/ec2-user/apache-tomcat-9.0.56/conf/context.xml'
-        block: |
+        regexp: '</Context>'
+        line: |
           <Valve className="tomcat.request.session.redis.SessionHandlerValve"/>
           <Manager className="tomcat.request.session.redis.SessionManager"/>
           </Context>
 
-    #- name: edit server.xml
-      #replace:
-        #path: '/home/ec2-user/apache-tomcat-9.0.54/conf/server.xml'
-        #regexp: '<!--<Cluster className="org.apache.catalina.ha.tcp.SimpleTcpCluster"/> -->'
-        #replace: '<Cluster className="org.apache.catalina.ha.tcp.SimpleTcpCluster"/>'
-
-    - name: edit redis-data-cache.properties
+    - name: edit server.xml
+      lineinfile:
+        path: '/home/ec2-user/apache-tomcat-9.0.56/conf/server.xml'
+        regexp: 'pattern="%h %l %u %t &quot;%r&quot; %s %b" />'
+        line: |
+          pattern="%h %l %u %t &quot;%r&quot; %s %b" />
+          <Cluster className="org.apache.catalina.ha.tcp.SimpleTcpCluster"/>
+    - name: copy redis
       copy:
         src: '/home/ec2-user/Ansible/session_check.jsp'
         dest: '/home/ec2-user/apache-tomcat-9.0.56/webapps/ROOT/session_check.jsp'

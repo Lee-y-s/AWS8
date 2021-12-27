@@ -1,12 +1,14 @@
 ---
 - name: set crontab
-  hosts: all
+  hosts: localhost
   gather_facts: false
-  ignore_errors: ture
+  ignore_errors: true
+  remote_user: root
   tasks:
   - name: crontab for log
     cron:
+      name: add crontab
       minute: "59"
       hour: "23"
-      user: root
-      job: "/home/ec2-user/cronLog.sh"
+      job: "/home/ec2-user/Ansible/cronlog.sh"
+      state: present
