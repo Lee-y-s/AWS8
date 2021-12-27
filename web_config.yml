@@ -1,0 +1,39 @@
+---
+- name: web tomcat config
+  hosts: web
+  gather_facts: false
+  ignore_errors: true
+  tasks:
+  - name: install yum httpd
+    yum:
+      name:
+        - yum
+        - httpd
+
+  - name: vi httpd.conf
+    replace:
+      path: /etc/httpd/conf/httpd.conf
+      regexp: '%h'
+      replace: '%{X-Forwarded-For}i'
+ 
+  - name: cp vhosts
+    copy:
+      src: "/home/ec2-user/vhost.conf"
+      dest: "/etc/httpd/conf.d/vhost.conf"
+
+  - name: vi vhosts
+    lineinfile:
+      path: /etc/httpd/conf/httpd.conf
+      regexp: '"#Include conf/extra/httpd-vhosts.conf"'
+      line: 'Include /etc/httpd/conf.d/vhost.conf'
+ 
+  - name: httpd start
+    systemd:
+      name: httpd
+      state: started
+
+  - name: restart apache
+    service:
+      name: apache2
+      state: restarted
+       
