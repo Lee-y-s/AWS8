@@ -33,18 +33,21 @@
         remote_src: yes
 
     - name: edit redis-data-cache.properties
-      shell: 'rm -rf /home/ec2-user/apache-tomcat-9.0.56/conf/redis-data-cache.properties'
-
-    - name: copy redis
-      copy:
-        src: '/home/ec2-user/Ansible/redis.jsp'
-        dest: '/home/ec2-user/apache-tomcat-9.0.56/conf/redis-data-cache.properties'
+      replace:
+        path: '/home/ec2-user/apache-tomcat-9.0.56/conf/redis-data-cache.properties'
+        regexp: 'redis.hosts=127.0.0.1:6379'
+        replace: 'redis.hosts=final-redis.pxq8zj.0001.apn2.cache.amazonaws.com:6379'
 
     - name: edit web.xml
       replace:
         path: '/home/ec2-user/apache-tomcat-9.0.56/conf/web.xml'
         regexp: '<session-timeout>30</session-timeout>'
         replace: '<session-timeout>60</session-timeout>'
+
+    - name: add web.xml
+      lineinfile:
+        path: '/home/ec2-user/apache-tomcat-9.0.56/conf/web.xml'
+        line: '<distributable/>'
 
     - name: add context.xml
       lineinfile:
@@ -54,7 +57,11 @@
           <Valve className="tomcat.request.session.redis.SessionHandlerValve"/>
           <Manager className="tomcat.request.session.redis.SessionManager"/>
           </Context>
-    - name: copy redis
-      copy:
-        src: '/home/ec2-user/Ansible/session_check.jsp'
-        dest: '/home/ec2-user/apache-tomcat-9.0.56/webapps/ROOT/session_check.jsp'
+
+    - name: edit server.xml
+      lineinfile:
+        path: '/home/ec2-user/apache-tomcat-9.0.56/conf/server.xml'
+        regexp: 'pattern="%h %l %u %t &quot;%r&quot; %s %b" />'
+        line: |
+          pattern="%h %l %u %t &quot;%r&quot; %s %b" />
+          <Cluster className="org.apache.catalina.ha.tcp.SimpleTcpCluster"/>
