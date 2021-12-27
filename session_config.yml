@@ -1,0 +1,77 @@
+---
+- name: create ddirectory
+  hosts: was
+  gather_facts: false
+  ignore_errors: true
+  tasks:
+    - name : delete
+      shell : 'rm -rf /home/ec2-user/apache-tomcat-9.0.56/download'
+
+    - name: create download directory
+      file:
+        path: /home/ec2-user/apache-tomcat-9.0.56/download
+        state: directory
+
+    - name: download tomcat-cluster-redis-session-manager
+      get_url:
+        url: 'https://github.com/ran-jit/tomcat-cluster-redis-session-manager/releases/download/2.0.4/tomcat-cluster-redis-session-manager.zip'
+        dest: '/home/ec2-user/apache-tomcat-9.0.56/download'
+
+    - name: unzip tomcat-cluster-redis-session-manager
+      unarchive:
+        src: '/home/ec2-user/apache-tomcat-9.0.56/download/tomcat-cluster-redis-session-manager.zip'
+        dest: '/home/ec2-user/apache-tomcat-9.0.56/download/'
+        remote_src: yes
+
+    - name: copy tomcat-cluster-redis-manager/lib
+      copy:
+        src: '/home/ec2-user/apache-tomcat-9.0.56/download/tomcat-cluster-redis-session-manager/lib/'
+        dest: '/home/ec2-user/apache-tomcat-9.0.56/lib'
+        remote_src: yes
+
+    - name: copy tomcat-cluster-redis-manager/conf
+      copy:
+        src: '/home/ec2-user/apache-tomcat-9.0.56/download/tomcat-cluster-redis-session-manager/conf/'
+        dest: '/home/ec2-user/apache-tomcat-9.0.56/conf'
+        remote_src: yes
+
+    - name: edit redis-data-cache.properties
+      copy:
+        src: '/home/ec2-user/Ansible/redis.jsp'
+        dest: '/home/ec2-user/apache-tomcat-9.0.56/conf/redis-data-cache.properties'
+   
+
+    - name: edit web.xml
+      replace:
+        path: '/home/ec2-user/apache-tomcat-9.0.56/conf/web.xml'
+        regexp: '<session-timeout>30</session-timeout>'
+        replace: '<session-timeout>60</session-timeout>'
+
+    - name: add web.xml
+      lineinfile:
+        path: '/home/ec2-user/apache-tomcat-9.0.56/conf/web.xml'
+        line: '<distributable/>'
+
+    - name: absent context.xml
+      ansible.builtin.lineinfile:
+        path: '/home/ec2-user/apache-tomcat-9.0.56/conf/context.xml'
+        line: '</Context>'
+
+    - name: add context.xml
+      blockinfile:
+        path: '/home/ec2-user/apache-tomcat-9.0.56/conf/context.xml'
+        block: |
+          <Valve className="tomcat.request.session.redis.SessionHandlerValve"/>
+          <Manager className="tomcat.request.session.redis.SessionManager"/>
+          </Context>
+
+    #- name: edit server.xml
+      #replace:
+        #path: '/home/ec2-user/apache-tomcat-9.0.54/conf/server.xml'
+        #regexp: '<!--<Cluster className="org.apache.catalina.ha.tcp.SimpleTcpCluster"/> -->'
+        #replace: '<Cluster className="org.apache.catalina.ha.tcp.SimpleTcpCluster"/>'
+
+    - name: edit redis-data-cache.properties
+      copy:
+        src: '/home/ec2-user/Ansible/session_check.jsp'
+        dest: '/home/ec2-user/apache-tomcat-9.0.56/webapps/ROOT/session_check.jsp'
