@@ -108,7 +108,15 @@
       name: tomcat.service
       state: started
 
+---
+
+- name: was status
+  hosts: localhost
+  gather_facts: false
+  ignore_errors: true
+  tasks:
+
   - name: tomcat Status
     shell: 'ansible was -m shell -a "systemctl status tomcat"'
     register: result
-  - debug: var=result 
+  - debug: var=result
