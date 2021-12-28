@@ -22,7 +22,7 @@
        }
    },
    "metrics": {
-       "namespace": "web_metrics",
+       "namespace": "fin_web_metrics",
       "metrics_collected": {
          "cpu": {
             "measurement": [

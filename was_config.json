@@ -17,7 +17,7 @@
        }
    },
    "metrics": {
-    "namespace": "was_metrics",
+    "namespace": "fin_was_metrics",
       "metrics_collected": {
          "cpu": {
             "measurement": [
