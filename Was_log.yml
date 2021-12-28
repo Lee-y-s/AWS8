@@ -3,6 +3,10 @@
   hosts: wasa
   gather_facts: false
   ignore_errors: true
+
+  vars:
+    date: "{{ lookup('pipe', 'date +%Y-%m-%d') }}"
+  
   tasks:
   - name: mkdir S3
     file:
@@ -12,16 +16,31 @@
       group: ec2-user
       mode: 0644
   
+  - name: chown
+    file:
+      path: /home/ec2-user/apache-tomcat-9.0.56
+      owner: ec2-user
+      group: ec2-user
+
+  - name: chmod
+    file:
+        path: /home/ec2-user/apache-tomcat-9.0.56
+        mode: 0777    
+
   - name: access log
     copy:
-      src: '/home/ec2-user/apache-tomcat-9.0.56/logs/catalina.*' 
-      dest: '/home/ec2-user/S3/Was-a/catalina.out'
+      src: '/home/ec2-user/apache-tomcat-9.0.56/logs/catalina.{{ date  }}.log' 
+      dest: '/home/ec2-user/S3/Was-a/'
       remote_src: yes
 
 - name: was log
   hosts: wasc
   gather_facts: false
   ignore_errors: true
+
+  vars:
+    date: "{{ lookup('pipe', 'date +%Y-%m-%d') }}"  
+
   tasks:
   - name: mkdir Was-c
     file:
@@ -31,9 +50,19 @@
       group: ec2-user
       mode: 0644
 
+  - name: chown
+    file:
+      path: /home/ec2-user/apache-tomcat-9.0.56
+      owner: ec2-user
+      group: ec2-user
+
+  - name: chmod
+    file:
+        path: /home/ec2-user/apache-tomcat-9.0.56
+        mode: 0777     
+
   - name: access log
     copy:
-      src: '/home/ec2-user/apache-tomcat-9.0.56/logs/catalina.*'
-      dest: '/home/ec2-user/S3/Was-c/catalina.out'
+      src: '/home/ec2-user/apache-tomcat-9.0.56/logs/catalina.{{ date  }}.log'
+      dest: '/home/ec2-user/S3/Was-c/'
       remote_src: yes
- 
