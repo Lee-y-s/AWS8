@@ -58,3 +58,12 @@
       copy:
         src: '/home/ec2-user/Ansible/session_check.jsp'
         dest: '/home/ec2-user/apache-tomcat-9.0.56/webapps/ROOT/session_check.jsp'
+    - name: Tomcat Stop
+      systemd:
+        name: tomcat.service
+        state: stopped
+        
+    - name: Tomcat Start
+      systemd:
+        name: tomcat.service
+        state: started 
