@@ -33,8 +33,18 @@
       name: httpd
       state: started
 
-  - name: restart apache
+  - name: restart httpd
     service:
       name: httpd
       state: restarted
-       
+
+- name: Web httpd Status
+  hosts: localhost
+  gather_facts: false
+  ignore_errors: true      
+  tasks:    
+
+  - name: Httpd Status
+    shell: 'ansible web -m shell -a "systemctl status httpd"'
+    register: result
+  - debug: var=result   

@@ -107,4 +107,8 @@
     systemd:
       name: tomcat.service
       state: started
-    
+
+  - name: tomcat Status
+    shell: 'ansible was -m shell -a "systemctl status tomcat"'
+    register: result
+  - debug: var=result 
