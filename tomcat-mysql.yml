@@ -108,8 +108,6 @@
       name: tomcat.service
       state: started
 
----
-
 - name: was status
   hosts: localhost
   gather_facts: false
